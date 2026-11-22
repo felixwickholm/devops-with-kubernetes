@@ -7,7 +7,7 @@ A CronJob that runs every hour. It asks `https://en.wikipedia.org/wiki/Special:R
 ```sh
 docker build -t felixwickholm/todo-cronjob:2.9 .
 docker push felixwickholm/todo-cronjob:2.9
-kubectl apply -f manifests
+kubectl apply -k ../project/overlays/production   # the CronJob is part of the project
 # run it once now instead of waiting for the next hour:
 kubectl -n production create job --from=cronjob/wikipedia-todo-cronjob wikipedia-todo-manual
 kubectl -n production logs job/wikipedia-todo-manual

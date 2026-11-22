@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummysite-controller-dep
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dummysite-controller
+  template:
+    metadata:
+      labels:
+        app: dummysite-controller
+    spec:
+      serviceAccountName: dummysite-controller-account
+      containers:
+        - name: dummysite-controller
+          image: felixwickholm/dummysite-controller:5.1
+          env:
+            - name: FETCH_IMAGE
+              value: curlimages/curl:8.11.1
+            - name: SERVE_IMAGE
+              value: nginx:1.27-alpine
+            # Each DummySite is served at http://<name>.<HOST_SUFFIX>:8081
+            - name: HOST_SUFFIX
+              value: localhost
