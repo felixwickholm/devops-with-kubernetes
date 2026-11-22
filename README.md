@@ -40,6 +40,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [4.9](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.9/project) The project, step 25 (also argocd, .github/workflows)
 - [5.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.1/dummysite) DIY CRD & Controller
 - [5.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.4/wikipedia_app) Wikipedia with init and sidecar
+- [5.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.5/platform_comparison) Platform comparison
 
 ## How AI was used
 
