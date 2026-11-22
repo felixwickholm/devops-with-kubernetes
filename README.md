@@ -27,6 +27,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [2.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.6/todo_app) The project, step 10 (also todo_backend)
 - [2.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.7/ping_pong) Stateful applications
 - [2.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.8/todo_backend) The project, step 11
+- [2.9](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.9/todo_cronjob) The project, step 12
 
 ## How AI was used
 
