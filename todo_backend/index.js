@@ -13,6 +13,7 @@ const requireEnv = (name) => {
 
 const PORT = requireEnv('PORT')
 const REDIRECT_URL = requireEnv('REDIRECT_URL')
+const TODO_MAX_LENGTH = Number(requireEnv('TODO_MAX_LENGTH'))
 for (const name of ['PGHOST', 'PGUSER', 'PGPASSWORD', 'PGDATABASE']) requireEnv(name)
 
 // Connection settings come from the standard PG* env variables.
@@ -52,7 +53,16 @@ const parseTodo = (req, body) => {
 
 const isForm = (req) => (req.headers['content-type'] || '').includes('application/x-www-form-urlencoded')
 
+// Logs every request with its status code when the response is sent.
+const logRequest = (req, res) => {
+  const start = Date.now()
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.url} ${res.statusCode} ${Date.now() - start}ms`)
+  })
+}
+
 const server = http.createServer(async (req, res) => {
+  logRequest(req, res)
   try {
     if (req.url === '/todos' && req.method === 'GET') {
       const { rows } = await pool.query('SELECT id, text, done FROM todos ORDER BY id')
@@ -66,11 +76,19 @@ const server = http.createServer(async (req, res) => {
       } catch {
         text = ''
       }
+      console.log(`Received todo: ${JSON.stringify(text)}`)
       if (!text) {
+        console.log('Rejected todo: empty')
         res.writeHead(400, { 'Content-Type': 'application/json' })
         return res.end(JSON.stringify({ error: 'todo is required' }))
       }
+      if (text.length > TODO_MAX_LENGTH) {
+        console.log(`Rejected todo: ${text.length} characters is over the limit of ${TODO_MAX_LENGTH}`)
+        res.writeHead(400, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ error: `todo must be at most ${TODO_MAX_LENGTH} characters` }))
+      }
       const { rows } = await pool.query('INSERT INTO todos (text) VALUES ($1) RETURNING id, text, done', [text])
+      console.log(`Created todo ${rows[0].id}`)
       // A browser form post is redirected back to the todo app page.
       if (isForm(req)) {
         res.writeHead(302, { Location: REDIRECT_URL })
