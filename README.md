@@ -36,6 +36,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [4.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.5/todo_app) The project, step 22 (also todo_backend)
 - [4.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.6/broadcaster) The project, step 23 (also todo_backend)
 - [4.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.7/log_output) Baby steps to GitOps (also argocd, .github/workflows)
+- [4.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.8/project) The project, step 24 (also argocd, .github/workflows)
 
 ## How AI was used
 

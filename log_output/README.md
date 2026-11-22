@@ -41,6 +41,7 @@ docker build -t felixwickholm/log-output-reader:4.7 reader
 docker push felixwickholm/log-output-writer:1.10
 docker push felixwickholm/log-output-reader:4.7
 kubectl apply -f manifests/namespace.yaml
-kubectl apply -k . -f ../ping_pong/manifests
+kubectl apply -k .
+kubectl apply -f ../ping_pong/manifests
 # open http://localhost:8081/status
 ```
