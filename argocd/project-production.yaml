@@ -8,7 +8,8 @@ spec:
   source:
     repoURL: https://github.com/felixwickholm/devops-with-kubernetes
     path: project/overlays/production
-    targetRevision: main
+    # Moved to each tagged commit by .github/workflows/project-production.yaml
+    targetRevision: production
   destination:
     server: https://kubernetes.default.svc
     namespace: production

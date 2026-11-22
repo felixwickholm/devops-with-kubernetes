@@ -7,7 +7,7 @@ Sends status messages of the todos to an external chat service.
 - The broadcaster sends each message to `WEBHOOK_URL` in the "Generic" format: `{"user": "bot", "message": "A todo was created: ..."}`.
 - Without `WEBHOOK_URL`, the broadcaster only logs the messages.
 
-The external service here is a local stand-in: `manifests/webhook-receiver.yaml` runs an echo server that logs every payload. To use a real service, set `WEBHOOK_URL` in `manifests/configmap.yaml`.
+The external service here is a local stand-in: `../project/overlays/production/webhook-receiver.yaml` runs an echo server that logs every payload. To use a real service, set `WEBHOOK_URL` in the production overlay. In staging the broadcaster only logs (see [project](../project)).
 
 ## Run
 
@@ -24,15 +24,15 @@ Then:
 ```sh
 docker build -t felixwickholm/broadcaster:4.6 .
 docker push felixwickholm/broadcaster:4.6
-kubectl apply -f manifests -f ../todo_backend/manifests
+kubectl apply -k ../project/overlays/production
 # create a todo, then read the messages that arrived:
 curl -X POST -H 'Content-Type: application/json' -d '{"todo":"Hello NATS"}' http://localhost:8081/todos
-kubectl -n project logs deployment/webhook-receiver-dep | grep '"message": "'
+kubectl -n production logs deployment/webhook-receiver-dep | grep '"message": "'
 ```
 
 Test with 6 replicas (9 events gave 9 messages, each once, spread over the replicas):
 
 ```sh
-for p in $(kubectl -n project get pods -l app=broadcaster -o name); do echo "$p $(kubectl -n project logs $p | grep -c Forwarded)"; done
-kubectl -n project logs deployment/webhook-receiver-dep | grep '"message": "' | sort | uniq -c
+for p in $(kubectl -n production get pods -l app=broadcaster -o name); do echo "$p $(kubectl -n production logs $p | grep -c Forwarded)"; done
+kubectl -n production logs deployment/webhook-receiver-dep | grep '"message": "' | sort | uniq -c
 ```

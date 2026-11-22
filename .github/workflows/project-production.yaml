@@ -1,5 +1,7 @@
 name: Project production release
 
+# Each tagged commit is deployed to production: the workflow moves the branch "production"
+# to the tagged commit, and ArgoCD (argocd/project-production.yaml) follows that branch.
 on:
   push:
     tags:
@@ -8,32 +10,24 @@ on:
 permissions:
   contents: write
 
-concurrency: project-kustomization
+concurrency: project-production
 
 jobs:
-  build-publish:
-    name: Build, push and update kustomization
+  release:
+    name: Build images and move the production branch
     runs-on: ubuntu-latest
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
-      - name: Skip when Docker Hub secrets are missing
-        if: env.DOCKERHUB_TOKEN == ''
-        run: echo "::notice::Set the repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN to build images."
-
-      # The tag points to the released commit. The kustomization change is committed to main,
-      # which ArgoCD follows for production.
-      - name: Checkout main
-        if: env.DOCKERHUB_TOKEN != ''
+      - name: Checkout the tagged commit
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
 
-      - name: Check out the tagged code for the build
-        if: env.DOCKERHUB_TOKEN != ''
-        run: git worktree add ../tagged "$GITHUB_SHA"
+      - name: Notice about missing Docker Hub secrets
+        if: env.DOCKERHUB_TOKEN == ''
+        run: echo "::notice::DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are not set. Production gets the tagged manifests with the image tags they already have."
 
       - name: Set up QEMU
         if: env.DOCKERHUB_TOKEN != ''
@@ -55,21 +49,18 @@ jobs:
         uses: imranismail/setup-kustomize@v2
 
       # Each image is tagged with the commit SHA and built for amd64 and arm64.
-      - name: Build and push images, use them in the kustomization
+      - name: Build and push images, use them in the production kustomization
         if: env.DOCKERHUB_TOKEN != ''
         run: |-
           for app in todo_app todo_backend broadcaster todo_cronjob; do
             image="felixwickholm/$(echo $app | tr _ -)"
-            docker buildx build --platform linux/amd64,linux/arm64 --tag "$image:$GITHUB_SHA" --push ../tagged/$app
+            docker buildx build --platform linux/amd64,linux/arm64 --tag "$image:$GITHUB_SHA" --push $app
             (cd project/overlays/production && kustomize edit set image "$image=$image:$GITHUB_SHA")
           done
-
-      - name: Commit the production kustomization.yaml to main
-        if: env.DOCKERHUB_TOKEN != ''
-        run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add project/overlays/production/kustomization.yaml
           git commit -m "Project: production images for tag $GITHUB_REF_NAME ($GITHUB_SHA)"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+      - name: Move the production branch
+        run: git push --force origin HEAD:refs/heads/production

@@ -11,7 +11,7 @@ The todos are stored in the [todo backend](../todo_backend). The page gets them 
 
 ## Run
 
-All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
+The manifests have no namespace. The [project](../project) overlays deploy them to the namespaces `staging` and `production`.
 
 The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 
@@ -19,7 +19,6 @@ The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 docker build -t felixwickholm/todo-app:4.8 .
 docker push felixwickholm/todo-app:4.8
-kubectl apply -f manifests/namespace.yaml
-kubectl apply -k ../project   # the whole project, see ../project
+kubectl apply -k ../project/overlays/staging   # the whole project, see ../project
 # open http://localhost:8081
 ```

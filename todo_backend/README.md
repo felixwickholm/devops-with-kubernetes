@@ -25,15 +25,14 @@ Configuration:
 
 ## Run
 
-All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
+The manifests have no namespace. The [project](../project) overlays deploy them to the namespaces `staging` and `production`.
 
 ```sh
 docker build -t felixwickholm/todo-backend:4.6 .
 docker push felixwickholm/todo-backend:4.6
-kubectl apply -f ../todo_app/manifests/namespace.yaml
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-sops --decrypt secrets/secret.enc.yaml | kubectl apply -f -
-kubectl apply -k ../project   # the whole project, see ../project
+sops --decrypt secrets/secret.enc.yaml | kubectl apply -n staging -f -
+kubectl apply -k ../project/overlays/staging   # the whole project, see ../project
 curl -X POST -H 'Content-Type: application/json' -d '{"todo":"Test"}' http://localhost:8081/todos
 # a todo over 140 characters is blocked:
 curl -i -X POST -H 'Content-Type: application/json' -d "{\"todo\":\"$(printf 'x%.0s' $(seq 141))\"}" http://localhost:8081/todos

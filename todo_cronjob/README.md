@@ -9,6 +9,6 @@ docker build -t felixwickholm/todo-cronjob:2.9 .
 docker push felixwickholm/todo-cronjob:2.9
 kubectl apply -f manifests
 # run it once now instead of waiting for the next hour:
-kubectl -n project create job --from=cronjob/wikipedia-todo-cronjob wikipedia-todo-manual
-kubectl -n project logs job/wikipedia-todo-manual
+kubectl -n production create job --from=cronjob/wikipedia-todo-cronjob wikipedia-todo-manual
+kubectl -n production logs job/wikipedia-todo-manual
 ```
