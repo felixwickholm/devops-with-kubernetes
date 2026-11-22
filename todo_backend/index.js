@@ -116,6 +116,24 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json' })
       return res.end(JSON.stringify(rows[0]))
     }
+    const match = req.url.match(/^\/todos\/(\d+)$/)
+    if (match && req.method === 'PUT') {
+      let done = true
+      try {
+        const body = JSON.parse((await readBody(req)) || '{}')
+        if (typeof body.done === 'boolean') done = body.done
+      } catch {
+        // An empty or invalid body marks the todo as done.
+      }
+      const { rows } = await pool.query('UPDATE todos SET done = $1 WHERE id = $2 RETURNING id, text, done', [done, match[1]])
+      if (rows.length === 0) {
+        res.writeHead(404, { 'Content-Type': 'application/json' })
+        return res.end(JSON.stringify({ error: 'todo not found' }))
+      }
+      console.log(`Updated todo ${rows[0].id}: done=${rows[0].done}`)
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify(rows[0]))
+    }
     res.writeHead(404, { 'Content-Type': 'text/plain' })
     res.end('Not found\n')
   } catch (err) {

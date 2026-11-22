@@ -3,7 +3,10 @@
 Stores the todos in Postgres.
 
 - `GET /todos` returns the todos as JSON.
-- `POST /todos` creates a todo. It accepts JSON (`{"todo": "text"}`) or a form post (`todo=text`). A form post is redirected to `REDIRECT_URL`. Todos over `TODO_MAX_LENGTH` (140) characters are rejected with status 400.
+- `POST /todos` creates a todo. It accepts JSON (`{"todo": "text"}`) or a form post (`todo=text`). A form post is redirected to `REDIRECT_URL`.
+- `PUT /todos/<id>` sets the `done` field. The body `{"done": true}` (or no body) marks the todo as done.
+
+Todos over `TODO_MAX_LENGTH` (140) characters are rejected with status 400.
 
 Every request is logged (method, path, status, time), and every received, created and rejected todo is logged. The logs can be read in Grafana with Loki (see [monitoring](../monitoring)).
 
@@ -23,8 +26,8 @@ Configuration:
 All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
 
 ```sh
-docker build -t felixwickholm/todo-backend:4.2.1 .
-docker push felixwickholm/todo-backend:4.2.1
+docker build -t felixwickholm/todo-backend:4.5 .
+docker push felixwickholm/todo-backend:4.5
 kubectl apply -f ../todo_app/manifests/namespace.yaml
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 sops --decrypt secrets/secret.enc.yaml | kubectl apply -f -

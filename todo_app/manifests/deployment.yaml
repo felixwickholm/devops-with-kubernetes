@@ -19,7 +19,7 @@ spec:
             claimName: todo-claim
       containers:
         - name: todo-app
-          image: felixwickholm/todo-app:4.2.1
+          image: felixwickholm/todo-app:4.5
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 5

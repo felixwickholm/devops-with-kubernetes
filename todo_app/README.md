@@ -1,6 +1,6 @@
 # Todo app (course project)
 
-A web server that serves an HTML page at `/` with a random image from Lorem Picsum, a todo input (max 140 characters), a send button and the list of todos.
+A web server that serves an HTML page at `/` with a random image from Lorem Picsum, a todo input (max 140 characters), a send button, the list of todos not done (each with a "Mark as done" button that sends `PUT /todos/<id>`) and the list of done todos.
 
 The todos are stored in the [todo backend](../todo_backend). The page gets them from `TODO_BACKEND_URL` when it renders. The form posts to `/todos`, which the Ingress routes to the backend.
 
@@ -18,8 +18,8 @@ The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 ```sh
 k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 docker exec k3d-k3s-default-agent-0 sh -c "mkdir -p /tmp/kube-todo && chmod 777 /tmp/kube-todo"
-docker build -t felixwickholm/todo-app:4.2.1 .
-docker push felixwickholm/todo-app:4.2.1
+docker build -t felixwickholm/todo-app:4.5 .
+docker push felixwickholm/todo-app:4.5
 kubectl apply -f manifests/namespace.yaml
 kubectl apply -f ../volumes -f manifests -f ../todo_backend/manifests
 # open http://localhost:8081

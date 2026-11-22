@@ -116,9 +116,24 @@ const page = (todos) => `<!DOCTYPE html>
       <input type="text" name="todo" maxlength="140" placeholder="New todo (max 140 characters)" required>
       <button type="submit">Create todo</button>
     </form>
+    <h2>Todo</h2>
     <ul>
-      ${todos.map((todo) => `<li>${escapeHtml(todo.text)}</li>`).join('\n      ')}
+      ${todos.filter((todo) => !todo.done).map((todo) => `<li>${escapeHtml(todo.text)} <button onclick="markDone(${todo.id})">Mark as done</button></li>`).join('\n      ')}
     </ul>
+    <h2>Done</h2>
+    <ul>
+      ${todos.filter((todo) => todo.done).map((todo) => `<li>${escapeHtml(todo.text)}</li>`).join('\n      ')}
+    </ul>
+    <script>
+      const markDone = async (id) => {
+        await fetch('/todos/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ done: true }),
+        })
+        window.location.reload()
+      }
+    </script>
     <form method="POST" action="/break">
       <button type="submit">Break the app</button>
     </form>

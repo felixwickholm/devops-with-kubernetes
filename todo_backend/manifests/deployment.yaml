@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: felixwickholm/todo-backend:4.2.1
+          image: felixwickholm/todo-backend:4.5
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 5
