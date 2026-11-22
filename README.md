@@ -13,6 +13,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [1.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.5/todo_app) The project, step 3
 - [1.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.6/todo_app) The project, step 4
 - [1.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.7/log_output) External access with Ingress
+- [1.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.8/todo_app) The project, step 5
 
 ## How AI was used
 
