@@ -11,6 +11,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [1.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.3/log_output) Declarative approach
 - [1.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.4/todo_app) The project, step 2
 - [1.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.5/todo_app) The project, step 3
+- [1.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.6/todo_app) The project, step 4
 
 ## How AI was used
 
