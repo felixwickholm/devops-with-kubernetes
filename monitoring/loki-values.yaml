@@ -13,7 +13,6 @@ loki:
   storage:
     type: filesystem
   useTestSchema: true
+# The default chunks cache asks for about 8 GB of memory, which a local k3d cluster does not have.
 chunksCache:
-  enabled: false
-resultsCache:
-  enabled: false
+  allocatedMemory: 256
