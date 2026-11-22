@@ -9,11 +9,14 @@ The reader gets the ping-pong count over HTTP from `GET /pings` of the [Ping-pon
 
 ## Run
 
+All resources are in the `exercises` namespace (`log_output/manifests/namespace.yaml`).
+
 ```sh
 docker build -t felixwickholm/log-output-writer:1.10 writer
 docker build -t felixwickholm/log-output-reader:2.1 reader
 docker push felixwickholm/log-output-writer:1.10
 docker push felixwickholm/log-output-reader:2.1
+kubectl apply -f manifests/namespace.yaml
 kubectl apply -f manifests -f ../ping_pong/manifests
 # open http://localhost:8081/status
 ```

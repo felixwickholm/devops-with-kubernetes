@@ -7,9 +7,12 @@ It shares the Ingress of Log output (`log_output/manifests/ingress.yaml`).
 
 ## Run
 
+All resources are in the `exercises` namespace (`log_output/manifests/namespace.yaml`).
+
 ```sh
 docker build -t felixwickholm/ping-pong:2.1 .
 docker push felixwickholm/ping-pong:2.1
+kubectl apply -f ../log_output/manifests/namespace.yaml
 kubectl apply -f manifests -f ../log_output/manifests
 # open http://localhost:8081/pingpong and http://localhost:8081/status
 ```
