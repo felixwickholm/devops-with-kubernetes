@@ -10,4 +10,4 @@ images:
   - name: felixwickholm/log-output-writer
     newTag: "1.10"
   - name: felixwickholm/log-output-reader
-    newTag: "4.1"
+    newTag: "4.7"
