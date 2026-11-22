@@ -32,6 +32,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [4.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.1/ping_pong) Readiness probe (also log_output)
 - [4.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.2/todo_app) The project, step 21 (also todo_backend)
 - [4.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.3/monitoring) Prometheus
+- [4.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.4/ping_pong) Your canary
 
 ## How AI was used
 

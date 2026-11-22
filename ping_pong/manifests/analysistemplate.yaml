@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  namespace: exercises
+  name: cpu-usage
+spec:
+  metrics:
+    # Measures the CPU usage rate sum of all containers in the namespace once a minute for 5 minutes.
+    # One measurement over the limit fails the analysis, and the Rollout reverts the update.
+    - name: cpu-usage
+      interval: 1m
+      count: 5
+      failureLimit: 0
+      successCondition: result < 0.1
+      provider:
+        prometheus:
+          address: http://prom-prometheus-server.monitoring.svc.cluster.local:80
+          query: |
+            scalar(sum(rate(container_cpu_usage_seconds_total{namespace="exercises"}[2m])))
