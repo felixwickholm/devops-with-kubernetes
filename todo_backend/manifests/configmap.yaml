@@ -6,3 +6,4 @@ metadata:
 data:
   PORT: "3002"
   REDIRECT_URL: /
+  PGHOST: todo-postgres-svc
