@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
   - manifests/configmap.yaml
   - manifests/deployment.yaml
-  - manifests/webhook-receiver.yaml

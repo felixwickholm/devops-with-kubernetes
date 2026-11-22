@@ -1,4 +1,4 @@
-name: Project release
+name: Project staging release
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 permissions:
   contents: write
 
-concurrency: project
+concurrency: project-kustomization
 
 jobs:
   build-publish:
@@ -58,15 +58,15 @@ jobs:
           for app in todo_app todo_backend broadcaster todo_cronjob; do
             image="felixwickholm/$(echo $app | tr _ -)"
             docker buildx build --platform linux/amd64,linux/arm64 --tag "$image:$GITHUB_SHA" --push $app
-            (cd project && kustomize edit set image "$image=$image:$GITHUB_SHA")
+            (cd project/overlays/staging && kustomize edit set image "$image=$image:$GITHUB_SHA")
           done
 
-      - name: Commit kustomization.yaml
+      - name: Commit the staging kustomization.yaml
         if: env.DOCKERHUB_TOKEN != ''
         run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add project/kustomization.yaml
-          git commit -m "Project: release images $GITHUB_SHA"
+          git add project/overlays/staging/kustomization.yaml
+          git commit -m "Project: staging images $GITHUB_SHA"
           git pull --rebase origin main
           git push origin HEAD:main

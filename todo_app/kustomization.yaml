@@ -4,6 +4,5 @@ resources:
   - manifests/configmap.yaml
   - manifests/deployment.yaml
   - manifests/ingress.yaml
-  - manifests/namespace.yaml
   - manifests/persistentvolumeclaim.yaml
   - manifests/service.yaml
