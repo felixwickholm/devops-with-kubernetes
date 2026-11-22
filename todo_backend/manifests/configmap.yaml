@@ -8,3 +8,5 @@ data:
   REDIRECT_URL: /
   TODO_MAX_LENGTH: "140"
   PGHOST: todo-postgres-svc
+  NATS_URL: nats://my-nats.nats.svc.cluster.local:4222
+  NATS_SUBJECT: todos

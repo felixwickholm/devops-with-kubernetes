@@ -1,5 +1,6 @@
 const http = require('http')
 const { Pool } = require('pg')
+const { connect, JSONCodec } = require('nats')
 
 // All configuration comes from the environment (see manifests/configmap.yaml).
 const requireEnv = (name) => {
@@ -14,6 +15,8 @@ const requireEnv = (name) => {
 const PORT = requireEnv('PORT')
 const REDIRECT_URL = requireEnv('REDIRECT_URL')
 const TODO_MAX_LENGTH = Number(requireEnv('TODO_MAX_LENGTH'))
+const NATS_URL = requireEnv('NATS_URL')
+const NATS_SUBJECT = requireEnv('NATS_SUBJECT')
 for (const name of ['PGHOST', 'PGUSER', 'PGPASSWORD', 'PGDATABASE']) requireEnv(name)
 
 // Connection settings come from the standard PG* env variables.
@@ -38,6 +41,31 @@ const initDb = async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
   }
+}
+
+// Status messages of the todos go to NATS. The broadcaster forwards them.
+const jsonCodec = JSONCodec()
+let nats = null
+
+const connectNats = async () => {
+  for (;;) {
+    try {
+      nats = await connect({ servers: NATS_URL, maxReconnectAttempts: -1 })
+      console.log(`Connected to NATS at ${NATS_URL}`)
+      return
+    } catch (err) {
+      console.error(`NATS not ready: ${err.message}`)
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+  }
+}
+
+const publishTodo = (action, todo) => {
+  if (!nats) {
+    console.error(`NATS not connected, message about todo ${todo.id} not sent`)
+    return
+  }
+  nats.publish(NATS_SUBJECT, jsonCodec.encode({ action, todo }))
 }
 
 const readBody = (req) => new Promise((resolve, reject) => {
@@ -108,6 +136,7 @@ const server = http.createServer(async (req, res) => {
       }
       const { rows } = await pool.query('INSERT INTO todos (text) VALUES ($1) RETURNING id, text, done', [text])
       console.log(`Created todo ${rows[0].id}`)
+      publishTodo('created', rows[0])
       // A browser form post is redirected back to the todo app page.
       if (isForm(req)) {
         res.writeHead(302, { Location: REDIRECT_URL })
@@ -131,6 +160,7 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ error: 'todo not found' }))
       }
       console.log(`Updated todo ${rows[0].id}: done=${rows[0].done}`)
+      publishTodo('updated', rows[0])
       res.writeHead(200, { 'Content-Type': 'application/json' })
       return res.end(JSON.stringify(rows[0]))
     }
@@ -148,6 +178,7 @@ server.listen(PORT, () => {
 })
 
 initDb()
+connectNats()
 
 // Exit quickly when Kubernetes stops the container.
 process.on('SIGTERM', () => server.close(() => process.exit(0)))

@@ -6,6 +6,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "nats": "^2.29.3"
   }
 }
