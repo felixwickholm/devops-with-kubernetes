@@ -15,6 +15,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [1.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.7/log_output) External access with Ingress
 - [1.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.8/todo_app) The project, step 5
 - [1.9](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.9/ping_pong) More services
+- [1.10](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.10/log_output) Even more services
 
 ## How AI was used
 
