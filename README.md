@@ -7,6 +7,7 @@ Each exercise has a GitHub release named after its number. The links below point
 ## Exercises
 
 - [1.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.1/log_output) Getting started
+- [1.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.2/todo_app) The project, step 1
 
 ## How AI was used
 
