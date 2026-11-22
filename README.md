@@ -42,6 +42,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [5.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.4/wikipedia_app) Wikipedia with init and sidecar
 - [5.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.5/platform_comparison) Platform comparison
 - [5.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.2/istio) Getting started with Istio service mesh
+- [5.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.3/greeter) Log app, the Service Mesh Edition (also log_output)
 
 ## How AI was used
 

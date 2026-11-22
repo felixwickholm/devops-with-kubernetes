@@ -11,6 +11,8 @@ The reader has `GET /healthz`, which returns 200 only when Ping-pong answers. Th
 
 The ConfigMap `log-output-config` gives the reader the file `config/information.txt` (mounted as a volume) and the env variable `MESSAGE`. The reader prints both.
 
+The reader also shows a greeting from the [greeter](../greeter) service (env `GREETER_URL`). The namespace is in the Istio ambient mesh (exercise 5.3).
+
 ## GitOps (exercise 4.7)
 
 ArgoCD runs in the cluster and keeps Log output in sync with the `main` branch of this repository:
@@ -37,9 +39,9 @@ All resources are in the `exercises` namespace (`log_output/manifests/namespace.
 
 ```sh
 docker build -t felixwickholm/log-output-writer:1.10 writer
-docker build -t felixwickholm/log-output-reader:4.7 reader
+docker build -t felixwickholm/log-output-reader:5.3 reader
 docker push felixwickholm/log-output-writer:1.10
-docker push felixwickholm/log-output-reader:4.7
+docker push felixwickholm/log-output-reader:5.3
 kubectl apply -f manifests/namespace.yaml
 kubectl apply -k .
 kubectl apply -f ../ping_pong/manifests
