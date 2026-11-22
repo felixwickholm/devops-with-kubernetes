@@ -1,6 +1,17 @@
 const http = require('http')
 
-const PORT = process.env.PORT || 3000
+// All configuration comes from the environment (see manifests/configmap.yaml).
+const requireEnv = (name) => {
+  const value = process.env[name]
+  if (!value) {
+    console.error(`Missing environment variable ${name}`)
+    process.exit(1)
+  }
+  return value
+}
+
+const PORT = requireEnv('PORT')
+const REDIRECT_URL = requireEnv('REDIRECT_URL')
 const todos = []
 
 const readBody = (req) => new Promise((resolve, reject) => {
@@ -39,7 +50,7 @@ const server = http.createServer(async (req, res) => {
     todos.push(todo)
     // A browser form post is redirected back to the todo app page.
     if (isForm(req)) {
-      res.writeHead(302, { Location: '/' })
+      res.writeHead(302, { Location: REDIRECT_URL })
       return res.end()
     }
     res.writeHead(201, { 'Content-Type': 'application/json' })

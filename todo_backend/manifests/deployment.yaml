@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: felixwickholm/todo-backend:2.2
-          env:
-            - name: PORT
-              value: "3002"
+          image: felixwickholm/todo-backend:2.6
+          envFrom:
+            - configMapRef:
+                name: todo-backend-config
