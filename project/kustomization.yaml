@@ -9,7 +9,7 @@ resources:
   - ../todo_cronjob
 images:
   - name: felixwickholm/todo-app
-    newTag: "4.5"
+    newTag: "4.8"
   - name: felixwickholm/todo-backend
     newTag: "4.6"
   - name: felixwickholm/broadcaster
