@@ -19,6 +19,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [1.11](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.11/log_output) Persisting data (also ping_pong, volumes)
 - [1.12](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.12/todo_app) The project, step 6
 - [1.13](https://github.com/felixwickholm/devops-with-kubernetes/tree/1.13/todo_app) The project, step 7
+- [2.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.1/log_output) Connecting pods (also ping_pong)
 
 ## How AI was used
 
