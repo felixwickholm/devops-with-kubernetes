@@ -11,5 +11,5 @@ docker build -t felixwickholm/ping-pong:1.11 .
 docker push felixwickholm/ping-pong:1.11
 docker exec k3d-k3s-default-agent-0 sh -c "mkdir -p /tmp/kube && chmod 777 /tmp/kube"
 kubectl apply -f ../volumes -f manifests -f ../log_output/manifests
-# open http://localhost:8081/pingpong and http://localhost:8081
+# open http://localhost:8081/pingpong and http://localhost:8081/status
 ```

@@ -1,6 +1,61 @@
+const fs = require('fs')
 const http = require('http')
+const path = require('path')
 
 const PORT = process.env.PORT || 3000
+const IMAGE_DIR = process.env.IMAGE_DIR || '/usr/src/app/files'
+const IMAGE_URL = process.env.IMAGE_URL || 'https://picsum.photos/1200'
+const IMAGE_TTL_MS = (Number(process.env.IMAGE_TTL_MINUTES) || 10) * 60 * 1000
+
+const imageFile = path.join(IMAGE_DIR, 'image.jpg')
+const metaFile = path.join(IMAGE_DIR, 'image.json')
+
+fs.mkdirSync(IMAGE_DIR, { recursive: true })
+
+let fetching = null
+
+const fetchImage = async () => {
+  const res = await fetch(IMAGE_URL)
+  if (!res.ok) throw new Error(`Image fetch failed: ${res.status}`)
+  const data = Buffer.from(await res.arrayBuffer())
+  fs.writeFileSync(imageFile, data)
+  fs.writeFileSync(metaFile, JSON.stringify({ fetchedAt: Date.now() }))
+  console.log('Fetched a new image')
+}
+
+const refreshImage = () => {
+  if (!fetching) {
+    fetching = fetchImage()
+      .catch((err) => console.error(err.message))
+      .finally(() => { fetching = null })
+  }
+  return fetching
+}
+
+const imageAge = () => {
+  try {
+    const { fetchedAt } = JSON.parse(fs.readFileSync(metaFile, 'utf8'))
+    return Date.now() - fetchedAt
+  } catch {
+    return Infinity
+  }
+}
+
+// Serves the cached image. When the image is older than the TTL,
+// the old image is served one more time and a new one is fetched for the next request.
+const serveImage = async (res) => {
+  if (!fs.existsSync(imageFile)) {
+    await refreshImage()
+  } else if (imageAge() > IMAGE_TTL_MS) {
+    refreshImage()
+  }
+  if (!fs.existsSync(imageFile)) {
+    res.writeHead(503, { 'Content-Type': 'text/plain' })
+    return res.end('Image not available\n')
+  }
+  res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' })
+  fs.createReadStream(imageFile).pipe(res)
+}
 
 const page = `<!DOCTYPE html>
 <html>
@@ -10,6 +65,7 @@ const page = `<!DOCTYPE html>
   </head>
   <body>
     <h1>The project App</h1>
+    <img src="/image" alt="Random image" width="600">
     <p>DevOps with Kubernetes 2026</p>
   </body>
 </html>
@@ -19,6 +75,9 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     return res.end(page)
+  }
+  if (req.method === 'GET' && req.url === '/image') {
+    return serveImage(res)
   }
   res.writeHead(404, { 'Content-Type': 'text/plain' })
   res.end('Not found\n')
