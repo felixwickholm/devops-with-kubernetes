@@ -24,3 +24,7 @@ istioctl install --set profile=ambient --set values.global.platform=k3d --skip-c
 Kiali traffic graph of the namespace:
 
 ![Kiali graph of Bookinfo](kiali-bookinfo.png)
+
+## Note on cluster restarts
+
+After `k3d cluster stop` and `k3d cluster start`, pods that restart in place can lose their ambient mesh redirection (ztunnel logs `Connection refused` to port 15008). Deleting the pods in the mesh namespaces (`default`, `exercises`) so that they are recreated fixes it.

@@ -39,12 +39,19 @@ Each exercise has a GitHub release named after its number. The links below point
 - [4.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.8/project) The project, step 24 (also argocd, .github/workflows)
 - [4.9](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.9/project) The project, step 25 (also argocd, .github/workflows)
 - [5.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.1/dummysite) DIY CRD & Controller
-- [5.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.4/wikipedia_app) Wikipedia with init and sidecar
-- [5.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.5/platform_comparison) Platform comparison
 - [5.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.2/istio) Getting started with Istio service mesh
 - [5.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.3/greeter) Log app, the Service Mesh Edition (also log_output)
+- [5.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.4/wikipedia_app) Wikipedia with init and sidecar
+- [5.5](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.5/platform_comparison) Platform comparison
 - [5.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.6/knative) Trying serverless
 - [5.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.7/ping_pong_serverless) Deploy to serverless
+
+## Notes
+
+- Chapter 4 (exercises 3.1 to 3.12) needs Google Kubernetes Engine and is not done yet.
+- Everything else runs on a local k3d cluster (`k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2`). Each app folder has a README with the commands.
+- Secrets are only in the repository as SOPS (age) encrypted files (`*/secrets/secret.enc.yaml`). The age key is not in the repository.
+- `scripts/release-exercise.sh` adds an exercise link here and creates the tag and the release.
 
 ## How AI was used
 
