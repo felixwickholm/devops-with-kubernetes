@@ -1,0 +1,35 @@
+# Ping-pong as a Knative Service: it scales to zero when idle and starts again on the next request.
+# Knative sets PORT from containerPort.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  namespace: exercises
+  name: ping-pong
+spec:
+  template:
+    spec:
+      containers:
+        - image: felixwickholm/ping-pong:4.4
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /healthz
+          env:
+            - name: PGHOST
+              value: postgres-svc.exercises.svc.cluster.local
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB

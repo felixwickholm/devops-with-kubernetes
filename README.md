@@ -44,6 +44,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [5.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.2/istio) Getting started with Istio service mesh
 - [5.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.3/greeter) Log app, the Service Mesh Edition (also log_output)
 - [5.6](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.6/knative) Trying serverless
+- [5.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.7/ping_pong_serverless) Deploy to serverless
 
 ## How AI was used
 
