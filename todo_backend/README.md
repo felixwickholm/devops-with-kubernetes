@@ -16,23 +16,24 @@ The [todo app](../todo_app) reads the todos from this service, and the Ingress r
 
 `GET /healthz` returns 200 only when the database answers. The ReadinessProbe uses it.
 
-Postgres runs as a StatefulSet with one replica and a headless Service (`manifests/postgres.yaml`).
+Postgres runs as a StatefulSet with one replica and a headless Service (`apps/todo-backend/postgres.yaml` in the config repository).
 
 Configuration:
 
-- The ConfigMap `todo-backend-config` (`manifests/configmap.yaml`) sets `PORT`, `REDIRECT_URL`, `TODO_MAX_LENGTH`, `PGHOST`, `NATS_URL` and `NATS_SUBJECT`.
-- The Secret `todo-postgres-secret` has the database user, password and name. The repository has only the SOPS-encrypted version (`secrets/secret.enc.yaml`, age encryption). The age key is not in the repository.
+- The ConfigMap `todo-backend-config` (`apps/todo-backend/configmap.yaml` in the config repository) sets `PORT`, `REDIRECT_URL`, `TODO_MAX_LENGTH`, `PGHOST`, `NATS_URL` and `NATS_SUBJECT`.
+- The Secret `todo-postgres-secret` has the database user, password and name. The config repository has only the SOPS-encrypted version (`secrets/todo-postgres-secret.enc.yaml`, age encryption). The age key is not in any repository.
 
 ## Run
 
-The manifests have no namespace. The [project](../project) overlays deploy them to the namespaces `staging` and `production`.
+The Kubernetes configuration is in the separate repository [devops-with-kubernetes-config](https://github.com/felixwickholm/devops-with-kubernetes-config) (exercise 4.10).
 
 ```sh
 docker build -t felixwickholm/todo-backend:4.6 .
 docker push felixwickholm/todo-backend:4.6
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-sops --decrypt secrets/secret.enc.yaml | kubectl apply -n staging -f -
-kubectl apply -k ../project/overlays/staging   # the whole project, see ../project
+git clone https://github.com/felixwickholm/devops-with-kubernetes-config ../../devops-with-kubernetes-config
+sops --decrypt ../../devops-with-kubernetes-config/secrets/todo-postgres-secret.enc.yaml | kubectl apply -n staging -f -
+kubectl apply -k ../../devops-with-kubernetes-config/overlays/staging   # normally deployed by ArgoCD
 curl -X POST -H 'Content-Type: application/json' -d '{"todo":"Test"}' http://localhost:8081/todos
 # a todo over 140 characters is blocked:
 curl -i -X POST -H 'Content-Type: application/json' -d "{\"todo\":\"$(printf 'x%.0s' $(seq 141))\"}" http://localhost:8081/todos

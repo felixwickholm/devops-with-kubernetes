@@ -49,6 +49,7 @@ Each exercise has a GitHub release named after its number. The links below point
 ## Notes
 
 - Chapter 4 (exercises 3.1 to 3.12) needs Google Kubernetes Engine and is not done yet.
+- The project configuration (Kubernetes manifests, environments, ArgoCD Applications) is in the separate repository https://github.com/felixwickholm/devops-with-kubernetes-config (exercise 4.10). This repository has the code and the image build workflows.
 - Everything else runs on a local k3d cluster (`k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2`). Each app folder has a README with the commands.
 - Secrets are only in the repository as SOPS (age) encrypted files (`*/secrets/secret.enc.yaml`). The age key is not in the repository.
 - `scripts/release-exercise.sh` adds an exercise link here and creates the tag and the release.

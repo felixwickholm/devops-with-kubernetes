@@ -7,7 +7,7 @@ Sends status messages of the todos to an external chat service.
 - The broadcaster sends each message to `WEBHOOK_URL` in the "Generic" format: `{"user": "bot", "message": "A todo was created: ..."}`.
 - Without `WEBHOOK_URL`, the broadcaster only logs the messages.
 
-The external service here is a local stand-in: `../project/overlays/production/webhook-receiver.yaml` runs an echo server that logs every payload. To use a real service, set `WEBHOOK_URL` in the production overlay. In staging the broadcaster only logs (see [project](../project)).
+The external service here is a local stand-in: `overlays/production/webhook-receiver.yaml` in the [config repository](https://github.com/felixwickholm/devops-with-kubernetes-config) runs an echo server that logs every payload. To use a real service, set `WEBHOOK_URL` in the production overlay. In staging the broadcaster only logs.
 
 ## Run
 
@@ -24,7 +24,7 @@ Then:
 ```sh
 docker build -t felixwickholm/broadcaster:4.6 .
 docker push felixwickholm/broadcaster:4.6
-kubectl apply -k ../project/overlays/production
+kubectl apply -k https://github.com/felixwickholm/devops-with-kubernetes-config//overlays/production   # normally deployed by ArgoCD
 # create a todo, then read the messages that arrived:
 curl -X POST -H 'Content-Type: application/json' -d '{"todo":"Hello NATS"}' http://localhost:8081/todos
 kubectl -n production logs deployment/webhook-receiver-dep | grep '"message": "'

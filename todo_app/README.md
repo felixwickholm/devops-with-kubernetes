@@ -4,14 +4,14 @@ A web server that serves an HTML page at `/` with a random image from Lorem Pics
 
 The todos are stored in the [todo backend](../todo_backend). The page gets them from `TODO_BACKEND_URL` when it renders. The form posts to `/todos`, which the Ingress routes to the backend.
 
-- The image is cached in `files/` on a PersistentVolumeClaim (`manifests/persistentvolumeclaim.yaml`, k3s `local-path` storage class), so it survives container restarts.
+- The image is cached in `files/` on a PersistentVolumeClaim (`apps/todo-app/persistentvolumeclaim.yaml` in the config repository, k3s `local-path` storage class), so it survives container restarts.
 - The image stays the same for 10 minutes. After that, the old image is served one more time and a new one is fetched for the next request.
 - Probes: `GET /readyz` (readiness) returns 200 when the app works and the backend answers. `GET /healthz` (liveness) returns 500 after someone presses "Break the app". The liveness probe then restarts the container, and the app is healthy again.
-- Configuration: the source has no hard-coded ports or URLs. The ConfigMap `todo-app-config` (`manifests/configmap.yaml`) sets `PORT`, `IMAGE_DIR`, `IMAGE_URL`, `IMAGE_TTL_MINUTES` and `TODO_BACKEND_URL`. The app exits if one is missing.
+- Configuration: the source has no hard-coded ports or URLs. The ConfigMap `todo-app-config` (`apps/todo-app/configmap.yaml` in the config repository) sets `PORT`, `IMAGE_DIR`, `IMAGE_URL`, `IMAGE_TTL_MINUTES` and `TODO_BACKEND_URL`. The app exits if one is missing.
 
 ## Run
 
-The manifests have no namespace. The [project](../project) overlays deploy them to the namespaces `staging` and `production`.
+The Kubernetes configuration is in the separate repository [devops-with-kubernetes-config](https://github.com/felixwickholm/devops-with-kubernetes-config) (exercise 4.10). Its overlays deploy the project to the namespaces `staging` and `production`.
 
 The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 
@@ -19,6 +19,6 @@ The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 docker build -t felixwickholm/todo-app:4.8 .
 docker push felixwickholm/todo-app:4.8
-kubectl apply -k ../project/overlays/staging   # the whole project, see ../project
+kubectl apply -k https://github.com/felixwickholm/devops-with-kubernetes-config//overlays/staging   # the whole project, normally deployed by ArgoCD
 # open http://localhost:8081
 ```

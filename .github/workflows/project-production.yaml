@@ -1,66 +1,79 @@
 name: Project production release
 
-# Each tagged commit is deployed to production: the workflow moves the branch "production"
-# to the tagged commit, and ArgoCD (argocd/project-production.yaml) follows that branch.
+# The images are built here. The configuration is in the repository
+# felixwickholm/devops-with-kubernetes-config, where this workflow sets the new image tags
+# in overlays/production. ArgoCD deploys that repository.
 on:
   push:
     tags:
       - '*'
 
 permissions:
-  contents: write
+  contents: read
 
-concurrency: project-production
+concurrency: project-config
 
 jobs:
-  release:
-    name: Build images and move the production branch
+  build-publish:
+    name: Build, push and update the config repository
     runs-on: ubuntu-latest
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      CONFIG_REPO_TOKEN: ${{ secrets.CONFIG_REPO_TOKEN }}
     steps:
-      - name: Checkout the tagged commit
+      - name: Skip when secrets are missing
+        if: env.DOCKERHUB_TOKEN == '' || env.CONFIG_REPO_TOKEN == ''
+        run: echo "::notice::Set DOCKERHUB_USERNAME, DOCKERHUB_TOKEN and CONFIG_REPO_TOKEN to build images and update the config repository."
+
+      - name: Checkout code
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
+        uses: actions/checkout@v4
+
+      - name: Checkout the config repository
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Notice about missing Docker Hub secrets
-        if: env.DOCKERHUB_TOKEN == ''
-        run: echo "::notice::DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are not set. Production gets the tagged manifests with the image tags they already have."
+          repository: felixwickholm/devops-with-kubernetes-config
+          token: ${{ secrets.CONFIG_REPO_TOKEN }}
+          path: config
 
       - name: Set up QEMU
-        if: env.DOCKERHUB_TOKEN != ''
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        if: env.DOCKERHUB_TOKEN != ''
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
-        if: env.DOCKERHUB_TOKEN != ''
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up Kustomize
-        if: env.DOCKERHUB_TOKEN != ''
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         uses: imranismail/setup-kustomize@v2
 
       # Each image is tagged with the commit SHA and built for amd64 and arm64.
-      - name: Build and push images, use them in the production kustomization
-        if: env.DOCKERHUB_TOKEN != ''
+      - name: Build and push images, set the tags in the config repository
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
         run: |-
           for app in todo_app todo_backend broadcaster todo_cronjob; do
             image="felixwickholm/$(echo $app | tr _ -)"
             docker buildx build --platform linux/amd64,linux/arm64 --tag "$image:$GITHUB_SHA" --push $app
-            (cd project/overlays/production && kustomize edit set image "$image=$image:$GITHUB_SHA")
+            (cd config/overlays/production && kustomize edit set image "$image=$image:$GITHUB_SHA")
           done
+
+      - name: Commit to the config repository
+        if: env.DOCKERHUB_TOKEN != '' && env.CONFIG_REPO_TOKEN != ''
+        working-directory: config
+        run: |-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add project/overlays/production/kustomization.yaml
-          git commit -m "Project: production images for tag $GITHUB_REF_NAME ($GITHUB_SHA)"
-
-      - name: Move the production branch
-        run: git push --force origin HEAD:refs/heads/production
+          git add overlays/production/kustomization.yaml
+          git commit -m "Production images for code tag $GITHUB_REF_NAME ($GITHUB_SHA)"
+          git pull --rebase origin main
+          git push origin HEAD:main
