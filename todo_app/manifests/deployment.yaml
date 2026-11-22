@@ -16,7 +16,7 @@ spec:
       volumes:
         - name: image-cache
           persistentVolumeClaim:
-            claimName: todo-claim
+            claimName: image-cache-claim
       containers:
         - name: todo-app
           image: felixwickholm/todo-app:4.5
