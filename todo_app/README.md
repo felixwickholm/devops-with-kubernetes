@@ -1,10 +1,12 @@
 # Todo app (course project)
 
-A web server that serves an HTML page at `/` with a random image from Lorem Picsum, a todo input (max 140 characters), a send button and a list of hardcoded todos.
+A web server that serves an HTML page at `/` with a random image from Lorem Picsum, a todo input (max 140 characters), a send button and the list of todos.
+
+The todos are stored in the [todo backend](../todo_backend). The page gets them from `TODO_BACKEND_URL` when it renders. The form posts to `/todos`, which the Ingress routes to the backend.
 
 - The image is cached in `files/` on a PersistentVolume (see [volumes](../volumes)), so it survives container restarts.
 - The image stays the same for 10 minutes. After that, the old image is served one more time and a new one is fetched for the next request.
-- Environment: `PORT` (default 3000), `IMAGE_DIR`, `IMAGE_URL`, `IMAGE_TTL_MINUTES` (default 10).
+- Environment: `PORT` (default 3000), `IMAGE_DIR`, `IMAGE_URL`, `IMAGE_TTL_MINUTES` (default 10), `TODO_BACKEND_URL`.
 
 ## Run
 
@@ -13,8 +15,8 @@ The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 ```sh
 k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 docker exec k3d-k3s-default-agent-0 sh -c "mkdir -p /tmp/kube-todo && chmod 777 /tmp/kube-todo"
-docker build -t felixwickholm/todo-app:1.13 .
-docker push felixwickholm/todo-app:1.13
-kubectl apply -f ../volumes -f manifests
+docker build -t felixwickholm/todo-app:2.2 .
+docker push felixwickholm/todo-app:2.2
+kubectl apply -f ../volumes -f manifests -f ../todo_backend/manifests
 # open http://localhost:8081
 ```
