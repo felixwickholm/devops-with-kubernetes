@@ -1,0 +1,13 @@
+# DevOps with Kubernetes 2026 (University of Helsinki MOOC)
+
+Exercise submissions for https://courses.mooc.fi/org/uh-cs/courses/devops-with-kubernetes-2026
+
+Each exercise has a GitHub release named after its number. The links below point to that release and the folder for the exercise.
+
+## Exercises
+
+(Links are added as exercises are done.)
+
+## How AI was used
+
+The course allows LLM tools ("Using LLM:s", Chapter 1). I directed an AI coding agent (Claude) to write and debug the apps and Kubernetes configs, and I take responsibility for the result.
