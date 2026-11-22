@@ -1,0 +1,77 @@
+name: Log output release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - log_output/writer/**
+      - log_output/reader/**
+      - .github/workflows/log-output.yaml
+
+permissions:
+  contents: write
+
+concurrency: log-output
+
+jobs:
+  build-publish:
+    name: Build, push and update kustomization
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    steps:
+      - name: Skip when Docker Hub secrets are missing
+        if: env.DOCKERHUB_TOKEN == ''
+        run: echo "::notice::Set the repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN to build images."
+
+      - name: Checkout
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # The images are tagged with the commit SHA to get a unique tag.
+      # Both platforms are built, so the images run on GKE (amd64) and on a local k3d on Apple silicon (arm64).
+      - name: Build and push images
+        if: env.DOCKERHUB_TOKEN != ''
+        run: |-
+          for app in writer reader; do
+            docker buildx build --platform linux/amd64,linux/arm64 \
+              --tag "felixwickholm/log-output-$app:$GITHUB_SHA" --push log_output/$app
+          done
+
+      - name: Set up Kustomize
+        if: env.DOCKERHUB_TOKEN != ''
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Use the new images
+        if: env.DOCKERHUB_TOKEN != ''
+        working-directory: log_output
+        run: |-
+          kustomize edit set image felixwickholm/log-output-writer=felixwickholm/log-output-writer:$GITHUB_SHA
+          kustomize edit set image felixwickholm/log-output-reader=felixwickholm/log-output-reader:$GITHUB_SHA
+
+      - name: Commit kustomization.yaml
+        if: env.DOCKERHUB_TOKEN != ''
+        run: |-
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add log_output/kustomization.yaml
+          git commit -m "Log output: release images $GITHUB_SHA"
+          git pull --rebase origin main
+          git push origin HEAD:main
