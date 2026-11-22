@@ -1,0 +1,20 @@
+# Calls to greeter-svc go 75 % to v1 and 25 % to v2. The waypoint of the namespace applies the route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  namespace: exercises
+  name: greeter
+spec:
+  parentRefs:
+    - group: ""
+      kind: Service
+      name: greeter-svc
+      port: 2345
+  rules:
+    - backendRefs:
+        - name: greeter-svc-1
+          port: 2345
+          weight: 75
+        - name: greeter-svc-2
+          port: 2345
+          weight: 25

@@ -6,8 +6,9 @@ resources:
   - manifests/deployment.yaml
   - manifests/service.yaml
   - manifests/ingress.yaml
+  - ../greeter
 images:
   - name: felixwickholm/log-output-writer
     newTag: "1.10"
   - name: felixwickholm/log-output-reader
-    newTag: "4.7"
+    newTag: "5.3"

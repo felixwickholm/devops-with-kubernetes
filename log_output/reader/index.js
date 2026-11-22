@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 3000
 const LOG_FILE = process.env.LOG_FILE || '/usr/src/app/files/log.txt'
 const INFO_FILE = process.env.INFO_FILE || '/usr/src/app/config/information.txt'
 const MESSAGE = process.env.MESSAGE || ''
+const GREETER_URL = process.env.GREETER_URL || 'http://greeter-svc:2345/'
 const PINGPONG_URL = process.env.PINGPONG_URL || 'http://ping-pong-svc:2345/pings'
 
 const lastLogLine = () => {
@@ -21,6 +22,16 @@ const fileContent = () => {
     return fs.readFileSync(INFO_FILE, 'utf8').trim()
   } catch {
     return ''
+  }
+}
+
+const getGreeting = async () => {
+  try {
+    const res = await fetch(GREETER_URL)
+    return await res.text()
+  } catch (err) {
+    console.error(`Could not get a greeting: ${err.message}`)
+    return 'unavailable'
   }
 }
 
@@ -51,13 +62,14 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(healthy ? 200 : 500, { 'Content-Type': 'application/json' })
     return res.end(JSON.stringify({ status: healthy ? 'ok' : 'ping-pong not available' }))
   }
-  const pongs = await getPongs()
+  const [pongs, greeting] = await Promise.all([getPongs(), getGreeting()])
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end([
     `file content: ${fileContent()}`,
     `env variable: MESSAGE=${MESSAGE}`,
     `${lastLogLine()}.`,
     `Ping / Pongs: ${pongs}`,
+    `greetings: ${greeting}`,
   ].join('\n') + '\n')
 })
 

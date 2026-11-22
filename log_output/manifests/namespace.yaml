@@ -2,3 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: exercises
+  labels:
+    # Istio ambient mesh, with the waypoint (greeter/manifests/waypoint.yaml) for L7 routing
+    istio.io/dataplane-mode: ambient
+    istio.io/use-waypoint: waypoint
