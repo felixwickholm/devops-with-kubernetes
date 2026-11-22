@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wikipedia-dep
+  namespace: exercises
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wikipedia
+  template:
+    metadata:
+      labels:
+        app: wikipedia
+    spec:
+      volumes:
+        - name: www
+          emptyDir: {}
+      initContainers:
+        # Saves the Kubernetes article before nginx starts.
+        - name: fetch-kubernetes-page
+          image: curlimages/curl:8.11.1
+          command: ["sh", "-c"]
+          args:
+            - curl -sSL -A "dwk-wikipedia/1.0" -o /www/index.html https://en.wikipedia.org/wiki/Kubernetes
+          volumeMounts:
+            - name: www
+              mountPath: /www
+      containers:
+        # Serves whatever is in the public www directory.
+        - name: nginx
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: www
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+        # Waits a random time between MIN_WAIT_SECONDS and MAX_WAIT_SECONDS (5 and 15 minutes),
+        # then replaces the page with a random Wikipedia article.
+        - name: random-page-sidecar
+          image: curlimages/curl:8.11.1
+          env:
+            - name: MIN_WAIT_SECONDS
+              value: "300"
+            - name: MAX_WAIT_SECONDS
+              value: "900"
+          command: ["sh", "-c"]
+          args:
+            - |
+              while true; do
+                wait=$(shuf -i "$MIN_WAIT_SECONDS-$MAX_WAIT_SECONDS" -n 1)
+                echo "Next random page in $wait seconds"
+                sleep "$wait"
+                if curl -sSL -A "dwk-wikipedia/1.0" -o /www/new.html https://en.wikipedia.org/wiki/Special:Random; then
+                  mv /www/new.html /www/index.html
+                  echo "Saved $(grep -o '<title>[^<]*' /www/index.html | sed 's/<title>//')"
+                fi
+              done
+          volumeMounts:
+            - name: www
+              mountPath: /www
