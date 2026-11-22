@@ -57,7 +57,15 @@ const serveImage = async (res) => {
   fs.createReadStream(imageFile).pipe(res)
 }
 
-const page = `<!DOCTYPE html>
+const todos = ['Learn JavaScript', 'Learn React', 'Build a project']
+
+const escapeHtml = (text) => text
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+
+const page = () => `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -66,6 +74,13 @@ const page = `<!DOCTYPE html>
   <body>
     <h1>The project App</h1>
     <img src="/image" alt="Random image" width="600">
+    <form onsubmit="return false">
+      <input type="text" name="todo" maxlength="140" placeholder="New todo (max 140 characters)" required>
+      <button type="submit">Create todo</button>
+    </form>
+    <ul>
+      ${todos.map((todo) => `<li>${escapeHtml(todo)}</li>`).join('\n      ')}
+    </ul>
     <p>DevOps with Kubernetes 2026</p>
   </body>
 </html>
@@ -74,7 +89,7 @@ const page = `<!DOCTYPE html>
 const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' })
-    return res.end(page)
+    return res.end(page())
   }
   if (req.method === 'GET' && req.url === '/image') {
     return serveImage(res)
