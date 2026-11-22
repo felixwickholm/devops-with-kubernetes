@@ -19,6 +19,8 @@ for (const name of ['PGHOST', 'PGUSER', 'PGPASSWORD', 'PGDATABASE']) requireEnv(
 // Connection settings come from the standard PG* env variables.
 const pool = new Pool()
 
+let dbReady = false
+
 const initDb = async () => {
   for (;;) {
     try {
@@ -29,6 +31,7 @@ const initDb = async () => {
           done BOOLEAN NOT NULL DEFAULT false
         )`)
       console.log('Connected to the database')
+      dbReady = true
       return
     } catch (err) {
       console.error(`Database not ready: ${err.message}`)
@@ -61,7 +64,23 @@ const logRequest = (req, res) => {
   })
 }
 
+// Healthy only when the database answers.
+const isHealthy = async () => {
+  if (!dbReady) return false
+  try {
+    await pool.query('SELECT 1')
+    return true
+  } catch {
+    return false
+  }
+}
+
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    const healthy = await isHealthy()
+    res.writeHead(healthy ? 200 : 500, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ status: healthy ? 'ok' : 'no database connection' }))
+  }
   logRequest(req, res)
   try {
     if (req.url === '/todos' && req.method === 'GET') {
@@ -106,8 +125,11 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-initDb().then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server started in port ${PORT}`)
-  })
+server.listen(PORT, () => {
+  console.log(`Server started in port ${PORT}`)
 })
+
+initDb()
+
+// Exit quickly when Kubernetes stops the container.
+process.on('SIGTERM', () => server.close(() => process.exit(0)))

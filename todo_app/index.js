@@ -84,6 +84,25 @@ const escapeHtml = (text) => text
   .replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;')
 
+// Set to false by the "Break the app" button. The liveness probe then restarts the container.
+let isHealthy = true
+
+// Ready when the app is not broken and the backend answers.
+const isReady = async () => {
+  if (!isHealthy) return false
+  try {
+    const res = await fetch(TODO_BACKEND_URL)
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+const sendJson = (res, status, body) => {
+  res.writeHead(status, { 'Content-Type': 'application/json' })
+  res.end(JSON.stringify(body))
+}
+
 const page = (todos) => `<!DOCTYPE html>
 <html>
   <head>
@@ -100,12 +119,32 @@ const page = (todos) => `<!DOCTYPE html>
     <ul>
       ${todos.map((todo) => `<li>${escapeHtml(todo.text)}</li>`).join('\n      ')}
     </ul>
+    <form method="POST" action="/break">
+      <button type="submit">Break the app</button>
+    </form>
     <p>DevOps with Kubernetes 2026</p>
   </body>
 </html>
 `
 
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    return sendJson(res, isHealthy ? 200 : 500, { status: isHealthy ? 'ok' : 'unhealthy' })
+  }
+  if (req.url === '/readyz') {
+    const ready = await isReady()
+    return sendJson(res, ready ? 200 : 500, { status: ready ? 'ok' : 'not ready' })
+  }
+  if (!isHealthy) {
+    res.writeHead(500, { 'Content-Type': 'text/plain' })
+    return res.end('The app is broken. Kubernetes will restart it soon.\n')
+  }
+  if (req.method === 'POST' && req.url === '/break') {
+    console.log('The app was broken on purpose')
+    isHealthy = false
+    res.writeHead(302, { Location: '/' })
+    return res.end()
+  }
   if (req.method === 'GET' && req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' })
     return res.end(page(await getTodos()))
@@ -120,3 +159,6 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Server started in port ${PORT}`)
 })
+
+// Exit quickly when Kubernetes stops the container.
+process.on('SIGTERM', () => server.close(() => process.exit(0)))

@@ -15,7 +15,13 @@ spec:
     spec:
       containers:
         - name: todo-backend
-          image: felixwickholm/todo-backend:2.10
+          image: felixwickholm/todo-backend:4.2.1
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /healthz
+              port: 3002
           envFrom:
             - configMapRef:
                 name: todo-backend-config

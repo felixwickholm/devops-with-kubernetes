@@ -19,7 +19,20 @@ spec:
             claimName: todo-claim
       containers:
         - name: todo-app
-          image: felixwickholm/todo-app:2.6
+          image: felixwickholm/todo-app:4.2.1
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            httpGet:
+              path: /readyz
+              port: 3001
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 2
+            httpGet:
+              path: /healthz
+              port: 3001
           envFrom:
             - configMapRef:
                 name: todo-app-config

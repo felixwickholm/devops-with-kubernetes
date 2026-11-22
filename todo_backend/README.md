@@ -9,6 +9,8 @@ Every request is logged (method, path, status, time), and every received, create
 
 The [todo app](../todo_app) reads the todos from this service, and the Ingress routes `/todos` here, so the browser form posts directly to it.
 
+`GET /healthz` returns 200 only when the database answers. The ReadinessProbe uses it.
+
 Postgres runs as a StatefulSet with one replica and a headless Service (`manifests/postgres.yaml`).
 
 Configuration:
@@ -21,8 +23,8 @@ Configuration:
 All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
 
 ```sh
-docker build -t felixwickholm/todo-backend:2.10 .
-docker push felixwickholm/todo-backend:2.10
+docker build -t felixwickholm/todo-backend:4.2.1 .
+docker push felixwickholm/todo-backend:4.2.1
 kubectl apply -f ../todo_app/manifests/namespace.yaml
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 sops --decrypt secrets/secret.enc.yaml | kubectl apply -f -
