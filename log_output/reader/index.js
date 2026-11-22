@@ -35,7 +35,22 @@ const getPongs = async () => {
   }
 }
 
+// Ready only when the Ping-pong app answers.
+const pingPongAvailable = async () => {
+  try {
+    const res = await fetch(PINGPONG_URL)
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 const server = http.createServer(async (req, res) => {
+  if (req.url === '/healthz') {
+    const healthy = await pingPongAvailable()
+    res.writeHead(healthy ? 200 : 500, { 'Content-Type': 'application/json' })
+    return res.end(JSON.stringify({ status: healthy ? 'ok' : 'ping-pong not available' }))
+  }
   const pongs = await getPongs()
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end([

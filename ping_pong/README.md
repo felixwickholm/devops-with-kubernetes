@@ -2,6 +2,7 @@
 
 - `GET /pingpong` responds with `pong N` and increases the counter N.
 - `GET /pings` returns the counter as JSON (`{"pings": N}`). [Log output](../log_output) calls it over HTTP.
+- `GET /healthz` returns 200 only when the database answers. The ReadinessProbe uses it, so the pod is not ready (0/1) until Postgres is available.
 
 The counter is saved in a Postgres database. Postgres runs as a StatefulSet with one replica and a headless Service (`manifests/postgres.yaml`). Its volume comes from the k3s `local-path` storage class.
 
@@ -12,8 +13,8 @@ It shares the Ingress of Log output (`log_output/manifests/ingress.yaml`). All r
 ## Run
 
 ```sh
-docker build -t felixwickholm/ping-pong:2.7 .
-docker push felixwickholm/ping-pong:2.7
+docker build -t felixwickholm/ping-pong:4.1 .
+docker push felixwickholm/ping-pong:4.1
 kubectl apply -f ../log_output/manifests/namespace.yaml
 export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 sops --decrypt secrets/secret.enc.yaml | kubectl apply -f -

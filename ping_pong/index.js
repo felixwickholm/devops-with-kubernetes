@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 3000
 // Connection settings come from the standard PG* env variables.
 const pool = new Pool()
 
+let dbReady = false
+
 const initDb = async () => {
   for (;;) {
     try {
@@ -16,6 +18,7 @@ const initDb = async () => {
         )`)
       await pool.query('INSERT INTO counter (id, value) VALUES (1, 0) ON CONFLICT (id) DO NOTHING')
       console.log('Connected to the database')
+      dbReady = true
       return
     } catch (err) {
       console.error(`Database not ready: ${err.message}`)
@@ -35,8 +38,24 @@ const incrementCounter = async () => {
   return rows[0].value
 }
 
+// Ready only when the database answers.
+const isHealthy = async () => {
+  if (!dbReady) return false
+  try {
+    await pool.query('SELECT 1')
+    return true
+  } catch {
+    return false
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
+    if (req.method === 'GET' && req.url === '/healthz') {
+      const healthy = await isHealthy()
+      res.writeHead(healthy ? 200 : 500, { 'Content-Type': 'application/json' })
+      return res.end(JSON.stringify({ status: healthy ? 'ok' : 'no database connection' }))
+    }
     if (req.method === 'GET' && req.url === '/pingpong') {
       const counter = await incrementCounter()
       res.writeHead(200, { 'Content-Type': 'text/plain' })
@@ -55,8 +74,8 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-initDb().then(() => {
-  server.listen(PORT, () => {
-    console.log(`Server started in port ${PORT}`)
-  })
+server.listen(PORT, () => {
+  console.log(`Server started in port ${PORT}`)
 })
+
+initDb()
