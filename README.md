@@ -38,6 +38,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [4.7](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.7/log_output) Baby steps to GitOps (also argocd, .github/workflows)
 - [4.8](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.8/project) The project, step 24 (also argocd, .github/workflows)
 - [4.9](https://github.com/felixwickholm/devops-with-kubernetes/tree/4.9/project) The project, step 25 (also argocd, .github/workflows)
+- [4.10](https://github.com/felixwickholm/devops-with-kubernetes-config/tree/4.10) The project, the grande finale (configuration repository; code in this repository at tag 4.10)
 - [5.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.1/dummysite) DIY CRD & Controller
 - [5.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.2/istio) Getting started with Istio service mesh
 - [5.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/5.3/greeter) Log app, the Service Mesh Edition (also log_output)
