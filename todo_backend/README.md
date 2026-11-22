@@ -9,9 +9,12 @@ The [todo app](../todo_app) reads the todos from this service, and the Ingress r
 
 ## Run
 
+All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
+
 ```sh
 docker build -t felixwickholm/todo-backend:2.2 .
 docker push felixwickholm/todo-backend:2.2
-kubectl apply -f manifests -f ../todo_app/manifests
+kubectl apply -f ../todo_app/manifests/namespace.yaml
+kubectl apply -f ../volumes -f manifests -f ../todo_app/manifests
 curl -X POST -H 'Content-Type: application/json' -d '{"todo":"Test"}' http://localhost:8081/todos
 ```

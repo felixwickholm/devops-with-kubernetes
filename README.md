@@ -22,6 +22,7 @@ Each exercise has a GitHub release named after its number. The links below point
 - [2.1](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.1/log_output) Connecting pods (also ping_pong)
 - [2.2](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.2/todo_app) The project, step 8 (also todo_backend)
 - [2.3](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.3/log_output) Keep them separated (also ping_pong)
+- [2.4](https://github.com/felixwickholm/devops-with-kubernetes/tree/2.4/todo_app) The project, step 9 (also todo_backend)
 
 ## How AI was used
 

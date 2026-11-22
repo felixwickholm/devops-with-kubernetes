@@ -10,6 +10,8 @@ The todos are stored in the [todo backend](../todo_backend). The page gets them 
 
 ## Run
 
+All project resources are in the `project` namespace (`todo_app/manifests/namespace.yaml`).
+
 The cluster maps host port 8081 to the load balancer (Ingress) on port 80:
 
 ```sh
@@ -17,6 +19,7 @@ k3d cluster create --port 8082:30080@agent:0 -p 8081:80@loadbalancer --agents 2
 docker exec k3d-k3s-default-agent-0 sh -c "mkdir -p /tmp/kube-todo && chmod 777 /tmp/kube-todo"
 docker build -t felixwickholm/todo-app:2.2 .
 docker push felixwickholm/todo-app:2.2
+kubectl apply -f manifests/namespace.yaml
 kubectl apply -f ../volumes -f manifests -f ../todo_backend/manifests
 # open http://localhost:8081
 ```
